@@ -7,6 +7,8 @@
 	"name": "federatedprompts",
 	"main": "src/index.ts",
 	"compatibility_date": "2026-02-12",
+	"account_id": "c22bb2c484c4d0e2fcff3d0719ed5e8d",
+	"workers_dev": true,
 	"compatibility_flags": [
 		"nodejs_compat",
 		"global_fetch_strictly_public"
