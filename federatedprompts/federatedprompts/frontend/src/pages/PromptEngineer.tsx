@@ -53,7 +53,7 @@ export const PromptEngineer: React.FC = () => {
 			<div className="page-header">
 				<div className="header-content">
 					<h1>🚀 UML Prompt Engineer</h1>
-					<p>Generate structured prompts for UML-driven development</p>
+					<p>Generate structured prompts for responsible development</p>
 				</div>
 				<button onClick={reset} className="btn btn-secondary btn-small" title="Reset form">
 					⟲ Reset
