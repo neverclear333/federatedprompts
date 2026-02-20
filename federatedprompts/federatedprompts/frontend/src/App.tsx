@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import PromptEngineer from './pages/PromptEngineer'
 import RealEstateDashboard from './pages/RealEstateDashboard'
 import './App.css'
@@ -10,6 +10,34 @@ function App() {
   const [count, setCount] = useState(0)
   const [status, setStatus] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  // Initialize page from URL on mount
+  useEffect(() => {
+    const path = window.location.pathname
+
+    if (path === '/' || path === '') {
+      setCurrentPage('home')
+    } else if (path === '/prompt-engineer') {
+      setCurrentPage('prompt-engineer')
+    } else if (path === '/real-estate-dashboard') {
+      setCurrentPage('real-estate-dashboard')
+    } else {
+      setCurrentPage('prompt-engineer') // Default
+    }
+  }, [])
+
+  // Update URL when page changes
+  const navigateTo = (page: Page) => {
+    setCurrentPage(page)
+
+    const pathMap: Record<Page, string> = {
+      'home': '/',
+      'prompt-engineer': '/prompt-engineer',
+      'real-estate-dashboard': '/real-estate-dashboard',
+    }
+
+    window.history.pushState({}, '', pathMap[page])
+  }
 
   const checkHealth = async () => {
     setLoading(true)
@@ -32,19 +60,19 @@ function App() {
           <h1 className="nav-title">FederatedPrompts</h1>
           <div className="nav-links">
             <button
-              onClick={() => setCurrentPage('home')}
+              onClick={() => navigateTo('home')}
               className={`nav-link ${currentPage === 'home' ? 'active' : ''}`}
             >
               Home
             </button>
             <button
-              onClick={() => setCurrentPage('prompt-engineer')}
+              onClick={() => navigateTo('prompt-engineer')}
               className={`nav-link ${currentPage === 'prompt-engineer' ? 'active' : ''}`}
             >
               Prompt Engineer
             </button>
             <button
-              onClick={() => setCurrentPage('real-estate-dashboard')}
+              onClick={() => navigateTo('real-estate-dashboard')}
               className={`nav-link ${currentPage === 'real-estate-dashboard' ? 'active' : ''}`}
             >
               Real Estate CRM
@@ -66,7 +94,7 @@ function App() {
                   A powerful tool for generating structured prompts for UML-driven development.
                 </p>
                 <button
-                  onClick={() => setCurrentPage('prompt-engineer')}
+                  onClick={() => navigateTo('prompt-engineer')}
                   className="btn btn-primary"
                 >
                   Start Creating Prompts →
