@@ -1,6 +1,6 @@
 /**
  * FederatedPrompts - Cloudflare Worker entry point
- * Routes requests to appropriate API handlers
+ * Routes requests to appropriate API handlers and serves frontend SPA
  */
 
 import { handleConfigRequest } from './api/config';
@@ -32,26 +32,30 @@ export default {
 			);
 		}
 
-		// Root endpoint
-		if (url.pathname === '/' || url.pathname === '') {
-			return new Response(
-				JSON.stringify({
-					name: 'FederatedPrompts API',
-					version: '1.0.0',
-					status: 'running',
-				}),
-				{
-					status: 200,
-					headers: { 'Content-Type': 'application/json' },
-				}
-			);
+		// Try to serve static assets (CSS, JS, images, etc.)
+		const assetResponse = await env.ASSETS.fetch(request.clone());
+
+		// If asset exists, return it
+		if (assetResponse.status !== 404) {
+			return assetResponse;
 		}
 
-		// Default 404
-		return new Response(JSON.stringify({ error: 'Endpoint not found' }), {
-			status: 404,
-			headers: { 'Content-Type': 'application/json' },
-		});
+		// For SPA routing: if not an API request and not a static asset, serve index.html
+		// This allows React Router to handle the path
+		const indexResponse = await env.ASSETS.fetch(new Request(new URL('/index.html', request.url), {
+			method: 'GET',
+		}));
+
+		// Return index.html with appropriate status
+		return indexResponse.status === 404
+			? new Response(JSON.stringify({ error: 'Not found' }), {
+					status: 404,
+					headers: { 'Content-Type': 'application/json' },
+				})
+			: new Response(indexResponse.body, {
+					status: 200,
+					headers: new Headers(indexResponse.headers),
+				});
 	},
 } satisfies ExportedHandler<Env>;
 
