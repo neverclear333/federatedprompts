@@ -5,6 +5,9 @@
 
 import { handleConfigRequest } from './api/config';
 import { handlePromptRequest } from './api/prompts';
+import { handleClientsRequest } from './api/clients';
+import { handleCampaignsRequest } from './api/campaigns';
+import { handleTasksRequest } from './api/tasks';
 
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -63,6 +66,21 @@ async function handleApiRequest(request: Request, env: Env, url: URL): Promise<R
 	// Route to prompts API
 	if (pathname.startsWith('/api/prompts')) {
 		return handlePromptRequest(request, url);
+	}
+
+	// Route to clients API
+	if (pathname.startsWith('/api/clients')) {
+		return handleClientsRequest(request, url);
+	}
+
+	// Route to campaigns API
+	if (pathname.startsWith('/api/campaigns')) {
+		return handleCampaignsRequest(request, url);
+	}
+
+	// Route to tasks API
+	if (pathname.startsWith('/api/tasks')) {
+		return handleTasksRequest(request, url);
 	}
 
 	// Default API 404
