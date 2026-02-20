@@ -825,6 +825,73 @@
 	margin-bottom: var(--spacing-sm);
 }
 
+/* ===== Token Information ===== */
+.token-info-container {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: var(--spacing-md);
+	margin-bottom: var(--spacing-lg);
+	padding: var(--spacing-md);
+	background: rgba(100, 108, 255, 0.05);
+	border-radius: var(--radius-md);
+	border: 1px solid var(--border-color);
+}
+
+.token-box {
+	padding: var(--spacing-md);
+	background: rgba(100, 108, 255, 0.08);
+	border-radius: var(--radius-md);
+	border-left: 4px solid var(--primary-color);
+	text-align: center;
+	transition: var(--transition);
+}
+
+.token-box:hover {
+	background: rgba(100, 108, 255, 0.12);
+	transform: translateY(-2px);
+}
+
+.token-box.prompt-tokens {
+	border-left-color: #3b82f6;
+}
+
+.token-box.execution-tokens {
+	border-left-color: #8b5cf6;
+}
+
+.token-box.total-tokens {
+	border-left-color: #10b981;
+}
+
+.token-label {
+	font-size: 0.85rem;
+	color: var(--text-secondary);
+	margin-bottom: var(--spacing-xs);
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.token-value {
+	font-size: 2rem;
+	font-weight: 700;
+	color: var(--primary-color);
+	margin-bottom: var(--spacing-xs);
+	font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.token-subtitle {
+	font-size: 0.75rem;
+	color: var(--text-secondary);
+	opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+	.token-info-container {
+		grid-template-columns: 1fr;
+	}
+}
+
 /* ===== History ===== */
 .history-step {
 	animation: fadeIn 0.3s ease;

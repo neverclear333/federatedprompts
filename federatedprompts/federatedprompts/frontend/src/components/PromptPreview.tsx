@@ -3,8 +3,9 @@
  * Displays generated prompts with syntax highlighting and export options
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { GeneratedPrompt } from '../types/prompt';
+import { getTokenInfo } from '../utils/tokenCounter';
 import '../styles/promptEngineer.css';
 
 interface PromptPreviewProps {
@@ -26,6 +27,12 @@ export const PromptPreview: React.FC<PromptPreviewProps> = ({
 }) => {
 	const [copiedToClipboard, setCopiedToClipboard] = useState(false);
 	const [exportFormat, setExportFormat] = useState<'markdown' | 'json' | 'text'>('markdown');
+
+	// Calculate token counts when prompt changes
+	const tokenInfo = useMemo(() => {
+		if (!prompt) return null;
+		return getTokenInfo(prompt.content, prompt.metadata.style);
+	}, [prompt]);
 
 	const handleCopy = async () => {
 		if (!prompt) return;
@@ -90,6 +97,27 @@ export const PromptPreview: React.FC<PromptPreviewProps> = ({
 					</div>
 				</div>
 			</div>
+
+			{/* Token Information Boxes */}
+			{tokenInfo && (
+				<div className="token-info-container">
+					<div className="token-box prompt-tokens">
+						<div className="token-label">Prompt Tokens</div>
+						<div className="token-value">{tokenInfo.promptTokens}</div>
+						<div className="token-subtitle">User input</div>
+					</div>
+					<div className="token-box execution-tokens">
+						<div className="token-label">Estimated Execution Tokens</div>
+						<div className="token-value">{tokenInfo.executionTokens}</div>
+						<div className="token-subtitle">Model response</div>
+					</div>
+					<div className="token-box total-tokens">
+						<div className="token-label">Total Tokens</div>
+						<div className="token-value">{tokenInfo.totalTokens}</div>
+						<div className="token-subtitle">Complete request</div>
+					</div>
+				</div>
+			)}
 
 			{/* Preview Content */}
 			<div className="preview-content">
