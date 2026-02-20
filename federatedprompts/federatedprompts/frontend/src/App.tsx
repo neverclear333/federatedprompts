@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import PromptEngineer from './pages/PromptEngineer'
+import RealEstateDashboard from './pages/RealEstateDashboard'
 import './App.css'
 
-type Page = 'home' | 'prompt-engineer'
+type Page = 'home' | 'prompt-engineer' | 'real-estate-dashboard'
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('prompt-engineer')
@@ -41,6 +42,12 @@ function App() {
               className={`nav-link ${currentPage === 'prompt-engineer' ? 'active' : ''}`}
             >
               Prompt Engineer
+            </button>
+            <button
+              onClick={() => setCurrentPage('real-estate-dashboard')}
+              className={`nav-link ${currentPage === 'real-estate-dashboard' ? 'active' : ''}`}
+            >
+              Real Estate CRM
             </button>
           </div>
         </div>
@@ -103,6 +110,8 @@ function App() {
         )}
 
         {currentPage === 'prompt-engineer' && <PromptEngineer />}
+
+        {currentPage === 'real-estate-dashboard' && <RealEstateDashboard />}
       </main>
     </div>
   )
