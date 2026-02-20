@@ -50,13 +50,14 @@ export interface ProjectContext {
 	domain: string;
 	techStack: string[];
 	teamRoles: string[];
+	customTeamRoles?: string[];
 }
 
 // Prompt configuration
 export interface PromptConfig {
 	projectContext: ProjectContext;
 	umlArtifacts: string[];
-	promptStyle: 'gherkin' | 'jira' | 'technical-spec';
+	promptStyle: 'gherkin' | 'jira' | 'technical-spec' | 'project-plan';
 	selectedVariables: Record<string, any>;
 	validatedAt?: string;
 }
@@ -138,13 +139,14 @@ export interface BuilderState {
 	step: 'setup' | 'artifacts' | 'builder' | 'preview' | 'save';
 	projectContext: ProjectContext;
 	umlArtifacts: string[];
-	promptStyle: 'gherkin' | 'jira' | 'technical-spec' | '';
+	promptStyle: 'gherkin' | 'jira' | 'technical-spec' | 'project-plan' | '';
 	selectedVariables: Record<string, any>;
 	generatedPrompt: GeneratedPrompt | null;
 	savedPrompts: StoredPrompt[];
 	loading: boolean;
 	error: string | null;
 	validationErrors: ValidationError[];
+	customTeamRoles: string[];
 }
 
 // Hook return type
@@ -154,8 +156,9 @@ export interface UsePromptBuilderReturn {
 	loadConfig: () => Promise<void>;
 	updateProjectContext: (context: Partial<ProjectContext>) => void;
 	updateArtifacts: (artifacts: string[]) => void;
-	updatePromptStyle: (style: 'gherkin' | 'jira' | 'technical-spec') => void;
+	updatePromptStyle: (style: 'gherkin' | 'jira' | 'technical-spec' | 'project-plan') => void;
 	updateVariable: (name: string, value: any) => void;
+	updateCustomRoles: (roles: string[]) => void;
 	validateConfig: () => Promise<boolean>;
 	generatePrompt: () => Promise<void>;
 	savePrompt: () => Promise<void>;
@@ -171,7 +174,7 @@ export interface UsePromptBuilderReturn {
 export interface PromptCache {
 	projectContext: ProjectContext | null;
 	umlArtifacts: string[];
-	promptStyle: 'gherkin' | 'jira' | 'technical-spec' | '';
+	promptStyle: 'gherkin' | 'jira' | 'technical-spec' | 'project-plan' | '';
 	selectedVariables: Record<string, any>;
 	federatedConfig: FederatedConfig | null;
 	lastUpdated: string;

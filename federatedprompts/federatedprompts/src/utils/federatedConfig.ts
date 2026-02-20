@@ -125,6 +125,12 @@ export const federatedConfig: FederatedConfigSchema = {
 			description: 'Detailed technical requirements and architecture',
 			compatibleWith: ['class', 'component', 'deployment', 'entity-relationship'],
 		},
+		{
+			value: 'project-plan',
+			label: 'Project Plan',
+			description: 'Structured project roadmap with phases and timeline',
+			compatibleWith: ['use-case', 'class', 'component', 'deployment', 'sequence'],
+		},
 	],
 
 	// Technology Stack Options

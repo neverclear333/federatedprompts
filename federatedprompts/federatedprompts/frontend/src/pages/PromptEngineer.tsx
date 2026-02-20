@@ -10,6 +10,7 @@ import ProjectSetup from '../components/ProjectSetup';
 import UMLModelSelector from '../components/UMLModelSelector';
 import GherkinPromptBuilder from '../components/GherkinPromptBuilder';
 import JiraPromptBuilder from '../components/JiraPromptBuilder';
+import ProjectPlanBuilder from '../components/ProjectPlanBuilder';
 import PromptPreview from '../components/PromptPreview';
 import '../styles/promptEngineer.css';
 
@@ -21,6 +22,7 @@ export const PromptEngineer: React.FC = () => {
 		updateArtifacts,
 		updatePromptStyle,
 		updateVariable,
+		updateCustomRoles,
 		validateConfig,
 		generatePrompt,
 		savePrompt,
@@ -132,6 +134,8 @@ export const PromptEngineer: React.FC = () => {
 						onNext={nextStep}
 						errors={state.validationErrors}
 						loading={state.loading}
+						customTeamRoles={state.customTeamRoles}
+						onCustomRolesChange={updateCustomRoles}
 					/>
 				)}
 
@@ -177,6 +181,13 @@ export const PromptEngineer: React.FC = () => {
 									icon="📐"
 									selected={state.promptStyle === 'technical-spec'}
 									onClick={() => updatePromptStyle('technical-spec')}
+								/>
+								<StyleCard
+									title="Project Plan"
+									description="Structured project roadmap with phases and timeline"
+									icon="🗺️"
+									selected={state.promptStyle === 'project-plan'}
+									onClick={() => updatePromptStyle('project-plan')}
 								/>
 							</div>
 						</div>
@@ -229,6 +240,18 @@ export const PromptEngineer: React.FC = () => {
 											</button>
 										</div>
 									</div>
+								)}
+
+								{state.promptStyle === 'project-plan' && (
+									<ProjectPlanBuilder
+										config={config}
+										umlArtifacts={state.umlArtifacts}
+										teamRoles={state.projectContext.teamRoles}
+										customTeamRoles={state.customTeamRoles}
+										projectName={state.projectContext.name}
+										onGenerate={handleGenerate}
+										loading={state.loading}
+									/>
 								)}
 							</div>
 						)}

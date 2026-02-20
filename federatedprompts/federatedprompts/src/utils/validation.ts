@@ -75,12 +75,18 @@ export function validatePromptConfig(config: any): ValidationResult {
 			field: 'promptStyle',
 			message: 'promptStyle is required',
 		});
-	} else if (!federatedConfig.promptStyles.some((s) => s.value === config.promptStyle)) {
-		errors.push({
-			field: 'promptStyle',
-			message: `"${config.promptStyle}" is not a valid prompt style`,
-			suggestion: `Valid options: ${federatedConfig.promptStyles.map((s) => s.value).join(', ')}`,
-		});
+	} else {
+		const validStyles = [
+			...federatedConfig.promptStyles.map((s) => s.value),
+			'project-plan',
+		];
+		if (!validStyles.includes(config.promptStyle)) {
+			errors.push({
+				field: 'promptStyle',
+				message: `"${config.promptStyle}" is not a valid prompt style`,
+				suggestion: `Valid options: ${validStyles.join(', ')}`,
+			});
+		}
 	}
 
 	// Validate selectedVariables
@@ -186,6 +192,41 @@ function validateProjectContext(context: any): ValidationError[] {
 					field: 'projectContext.teamRoles',
 					message: `"${role}" is not a valid team role`,
 				});
+			}
+		}
+	}
+
+	// Validate customTeamRoles (optional)
+	if (context.customTeamRoles) {
+		if (!Array.isArray(context.customTeamRoles)) {
+			errors.push({
+				field: 'projectContext.customTeamRoles',
+				message: 'customTeamRoles must be an array',
+			});
+		} else {
+			if (context.customTeamRoles.length > 5) {
+				errors.push({
+					field: 'projectContext.customTeamRoles',
+					message: 'Maximum 5 custom roles allowed',
+				});
+			}
+			for (const role of context.customTeamRoles) {
+				if (typeof role !== 'string') {
+					errors.push({
+						field: 'projectContext.customTeamRoles',
+						message: 'Custom roles must be strings',
+					});
+				} else if (role.length < 3 || role.length > 50) {
+					errors.push({
+						field: 'projectContext.customTeamRoles',
+						message: `Custom role "${role}" must be between 3 and 50 characters`,
+					});
+				} else if (!/^[a-zA-Z0-9\s\-_]+$/.test(role)) {
+					errors.push({
+						field: 'projectContext.customTeamRoles',
+						message: `Custom role "${role}" contains invalid characters. Only alphanumeric, spaces, hyphens, and underscores allowed`,
+					});
+				}
 			}
 		}
 	}

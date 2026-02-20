@@ -29,6 +29,7 @@ const initialState: BuilderState = {
 		domain: '',
 		techStack: [],
 		teamRoles: [],
+		customTeamRoles: [],
 	},
 	umlArtifacts: [],
 	promptStyle: '',
@@ -38,6 +39,7 @@ const initialState: BuilderState = {
 	loading: false,
 	error: null,
 	validationErrors: [],
+	customTeamRoles: [],
 };
 
 export function usePromptBuilder(): UsePromptBuilderReturn {
@@ -144,7 +146,7 @@ export function usePromptBuilder(): UsePromptBuilderReturn {
 
 	// Update prompt style
 	const updatePromptStyle = useCallback(
-		(style: 'gherkin' | 'jira' | 'technical-spec') => {
+		(style: 'gherkin' | 'jira' | 'technical-spec' | 'project-plan') => {
 			setState((prev) => ({
 				...prev,
 				promptStyle: style,
@@ -162,6 +164,14 @@ export function usePromptBuilder(): UsePromptBuilderReturn {
 				...prev.selectedVariables,
 				[name]: value,
 			},
+		}));
+	}, []);
+
+	// Update custom team roles
+	const updateCustomRoles = useCallback((roles: string[]) => {
+		setState((prev) => ({
+			...prev,
+			customTeamRoles: roles,
 		}));
 	}, []);
 
@@ -426,6 +436,7 @@ export function usePromptBuilder(): UsePromptBuilderReturn {
 		updateArtifacts,
 		updatePromptStyle,
 		updateVariable,
+		updateCustomRoles,
 		validateConfig,
 		generatePrompt,
 		savePrompt,

@@ -5,6 +5,7 @@
 
 import React from 'react';
 import type { ProjectContext, FederatedConfig } from '../types/prompt';
+import RoleSelector from './RoleSelector';
 import '../styles/promptEngineer.css';
 
 interface ProjectSetupProps {
@@ -14,6 +15,8 @@ interface ProjectSetupProps {
 	onNext: () => void;
 	errors: Array<{ field: string; message: string }>;
 	loading: boolean;
+	customTeamRoles?: string[];
+	onCustomRolesChange?: (roles: string[]) => void;
 }
 
 export const ProjectSetup: React.FC<ProjectSetupProps> = ({
@@ -23,6 +26,8 @@ export const ProjectSetup: React.FC<ProjectSetupProps> = ({
 	onNext,
 	errors,
 	loading,
+	customTeamRoles = [],
+	onCustomRolesChange,
 }) => {
 	const getErrorMessage = (field: string): string | undefined => {
 		return errors.find((e) => e.field.includes(field))?.message;
@@ -151,28 +156,16 @@ export const ProjectSetup: React.FC<ProjectSetupProps> = ({
 
 				{/* Team Roles */}
 				<div className="form-group">
-					<label htmlFor="teamRoles">
-						Team Roles <span className="required">*</span>
-					</label>
-					<select
-						id="teamRoles"
-						name="teamRoles"
-						multiple
-						value={projectContext.teamRoles}
-						onChange={handleMultiSelect}
-						className={getErrorMessage('teamRoles') ? 'error' : ''}
-						size={Math.min(6, config.teamRoles.length)}
-					>
-						{config.teamRoles.map((role) => (
-							<option key={role.value} value={role.value}>
-								{role.label}
-							</option>
-						))}
-					</select>
-					<span className="help-text">Hold Ctrl/Cmd to select multiple</span>
-					{getErrorMessage('teamRoles') && (
-						<span className="error-message">{getErrorMessage('teamRoles')}</span>
-					)}
+					<RoleSelector
+						predefinedRoles={config.teamRoles}
+						selectedRoles={projectContext.teamRoles}
+						customRoles={customTeamRoles}
+						onRolesChange={(selectedRoles, customRoles) => {
+							onContextChange({ teamRoles: selectedRoles });
+							onCustomRolesChange?.(customRoles);
+						}}
+						errors={errors}
+					/>
 				</div>
 
 				{/* Action Button */}

@@ -12,9 +12,10 @@ export interface PromptGenerationInput {
 		domain: string;
 		techStack: string[];
 		teamRoles: string[];
+		customTeamRoles?: string[];
 	};
 	umlArtifacts: string[];
-	promptStyle: 'gherkin' | 'jira' | 'technical-spec';
+	promptStyle: 'gherkin' | 'jira' | 'technical-spec' | 'project-plan';
 	selectedVariables: Record<string, any>;
 }
 
@@ -47,6 +48,9 @@ export function generatePrompt(input: PromptGenerationInput): GeneratedPromptOut
 			break;
 		case 'technical-spec':
 			({ content, title } = generateTechnicalSpec(input));
+			break;
+		case 'project-plan':
+			({ content, title } = generateProjectPlan(input));
 			break;
 		default:
 			throw new Error(`Unknown prompt style: ${promptStyle}`);
@@ -326,4 +330,145 @@ function getResponsibilities(role: string): string {
 	};
 
 	return responsibilities[role] || `- Contributing to ${role}`;
+}
+
+/**
+ * Generate project plan
+ */
+function generateProjectPlan(input: PromptGenerationInput): {
+	content: string;
+	title: string;
+} {
+	const { projectContext, umlArtifacts } = input;
+	const artifactLabels = getArtifactLabels(umlArtifacts);
+	const allRoles = [
+		...projectContext.teamRoles.map(getTeamRoleLabel),
+		...(projectContext.customTeamRoles || []),
+	];
+
+	const title = `Project Plan: ${projectContext.name}`;
+
+	let content = `# ${title}\n\n`;
+
+	content += `## Executive Summary\n`;
+	content += `This document outlines the complete project plan for ${projectContext.name}, a ${getTechLabel(projectContext.domain)} project.\n`;
+	content += `The project will create ${artifactLabels.length} UML artifact${artifactLabels.length !== 1 ? 's' : ''}: ${artifactLabels.join(', ')}.\n`;
+	content += `The team consists of ${allRoles.length} members with the following roles: ${allRoles.join(', ')}.\n\n`;
+
+	content += `## Project Overview\n`;
+	content += `**Project Name:** ${projectContext.name}\n`;
+	content += `**Domain:** ${getTechLabel(projectContext.domain)}\n`;
+	content += `**Description:** ${projectContext.description}\n`;
+	content += `**Technology Stack:** ${projectContext.techStack.map(getTechLabel).join(', ')}\n\n`;
+
+	// Calculate timeline
+	const weekPerArtifact = 2;
+	const baselineWeeks = umlArtifacts.length * weekPerArtifact + 1; // +1 for planning
+	const totalWeeks = baselineWeeks + 1; // +1 for deployment
+
+	content += `## Timeline Overview\n`;
+	content += `**Estimated Duration:** ${totalWeeks} weeks\n`;
+	content += `**Start Date:** [Project Start Date]\n`;
+	content += `**Target Completion:** [${totalWeeks} weeks from start]\n\n`;
+
+	// Phase breakdown
+	content += `## Phase Breakdown\n\n`;
+
+	content += `### Phase 1: Planning & Requirements (Week 1)\n`;
+	content += `**Deliverables:**\n`;
+	content += `- Project requirements document\n`;
+	content += `- Team alignment and kickoff\n`;
+	content += `- Technology stack confirmation\n`;
+	content += `- Success criteria definition\n\n`;
+	content += `**Assigned Roles:** ${allRoles.slice(0, 2).join(', ')}\n\n`;
+
+	const artifactWeeks = Math.ceil(umlArtifacts.length * weekPerArtifact / 2);
+	content += `### Phase 2: Design & Architecture (Weeks 2-${1 + artifactWeeks})\n`;
+	content += `**Deliverables:**\n`;
+	for (const artifact of artifactLabels) {
+		content += `- ${artifact}\n`;
+	}
+	content += `- Architecture documentation\n`;
+	content += `- Design review and approval\n\n`;
+	content += `**Assigned Roles:** ${allRoles.filter((_, i) => i % 2 === 0).join(', ')}\n\n`;
+
+	const devStart = 2 + artifactWeeks;
+	const devEnd = devStart + artifactWeeks;
+	content += `### Phase 3: Development & Implementation (Weeks ${devStart}-${devEnd})\n`;
+	content += `**Deliverables:**\n`;
+	content += `- Component implementation\n`;
+	content += `- Code reviews and quality assurance\n`;
+	content += `- Unit and integration tests\n`;
+	content += `- Implementation documentation\n\n`;
+	content += `**Assigned Roles:** ${allRoles.join(', ')}\n\n`;
+
+	const testStart = devEnd + 1;
+	const testEnd = testStart + 1;
+	content += `### Phase 4: Testing & Quality Assurance (Weeks ${testStart}-${testEnd})\n`;
+	content += `**Deliverables:**\n`;
+	content += `- Comprehensive test suite\n`;
+	content += `- QA verification and sign-off\n`;
+	content += `- Bug fixes and improvements\n`;
+	content += `- Final documentation review\n\n`;
+	content += `**Assigned Roles:** QA Engineers and ${allRoles[0]}\n\n`;
+
+	content += `### Phase 5: Deployment & Handoff (Week ${totalWeeks})\n`;
+	content += `**Deliverables:**\n`;
+	content += `- Production deployment\n`;
+	content += `- Knowledge transfer documentation\n`;
+	content += `- Team training and support\n`;
+	content += `- Project closure and retrospective\n\n`;
+	content += `**Assigned Roles:** DevOps and Project Lead\n\n`;
+
+	// Team assignments
+	content += `## Team Assignments & Responsibilities\n\n`;
+	for (const role of allRoles) {
+		const responsibilities = getResponsibilities(
+			projectContext.teamRoles.find((r) => getTeamRoleLabel(r) === role) || ''
+		);
+		content += `### ${role}\n`;
+		content += `${responsibilities}\n\n`;
+	}
+
+	// Success criteria
+	content += `## Success Criteria\n`;
+	for (const artifact of artifactLabels) {
+		content += `- ${artifact} created and documented\n`;
+	}
+	content += `- All team members trained and confident\n`;
+	content += `- System deployed to production\n`;
+	content += `- Performance targets met\n`;
+	content += `- Project delivered on schedule\n`;
+	content += `- All stakeholders satisfied\n\n`;
+
+	// Risk assessment
+	content += `## Risk Mitigation\n\n`;
+	content += `### Technical Risks\n`;
+	content += `- **Technology Integration:** Ensure compatibility testing of ${projectContext.techStack.map(getTechLabel).join(', ')} early\n`;
+	content += `- **Artifact Complexity:** Start with simpler artifacts to build team confidence\n`;
+	content += `- **Dependencies:** Identify cross-artifact dependencies upfront\n\n`;
+
+	content += `### Team Risks\n`;
+	content += `- **Skill Gaps:** Plan knowledge transfer sessions in advance\n`;
+	content += `- **Resource Availability:** Establish backup roles for critical positions\n`;
+	content += `- **Communication:** Implement daily standups and weekly planning sessions\n\n`;
+
+	content += `### Timeline Risks\n`;
+	content += `- **Buffer:** ${Math.ceil(totalWeeks * 0.1)} week buffer included in plan\n`;
+	content += `- **Scope Creep:** Strict change control process\n`;
+	content += `- **Dependencies:** Parallel workflows planned where possible\n\n`;
+
+	content += `## Resource Requirements\n`;
+	content += `- **Team Size:** ${allRoles.length} dedicated team members\n`;
+	content += `- **Tools & Infrastructure:** ${projectContext.techStack.map(getTechLabel).join(', ')}\n`;
+	content += `- **Duration:** ${totalWeeks} weeks\n`;
+	content += `- **Budget Estimate:** Based on ${totalWeeks} weeks × ${allRoles.length} team members\n\n`;
+
+	content += `## Next Steps\n`;
+	content += `1. Finalize team assignments and confirm availability\n`;
+	content += `2. Schedule project kickoff meeting\n`;
+	content += `3. Establish communication protocols\n`;
+	content += `4. Begin Phase 1: Planning & Requirements\n`;
+
+	return { content, title };
 }
