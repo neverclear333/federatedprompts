@@ -3,6 +3,7 @@
  * Handles follow-up tasks for clients
  */
 
+import type { Env } from '../env';
 import type { FollowUpTask } from '../types/realEstate';
 
 // In-memory storage (ready for D1 database upgrade)
@@ -105,11 +106,11 @@ export function listTasks(filters?: {
 	const total = tasks.length;
 
 	// Apply pagination
-	if (filters?.offset !== undefined) {
-		tasks = tasks.slice(filters.offset);
-	}
+	const offset = filters?.offset || 0;
 	if (filters?.limit !== undefined) {
-		tasks = tasks.slice(0, filters.limit);
+		tasks = tasks.slice(offset, offset + filters.limit);
+	} else if (offset > 0) {
+		tasks = tasks.slice(offset);
 	}
 
 	return { tasks, total };
@@ -222,6 +223,7 @@ function generateId(): string {
  */
 export async function handleTasksRequest(
 	request: Request,
+	env: Env,
 	url: URL
 ): Promise<Response> {
 	try {

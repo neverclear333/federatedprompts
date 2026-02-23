@@ -4,9 +4,10 @@
  * and validating all inputs against the single source of truth
  */
 
+import type { Env } from '../env';
 import { federatedConfig, FederatedConfigSchema } from '../utils/federatedConfig';
 
-export async function handleConfigRequest(url: URL): Promise<Response> {
+export async function handleConfigRequest(request: Request, env: Env, url: URL): Promise<Response> {
 	const pathname = url.pathname;
 
 	// GET /api/config/all - Return complete configuration

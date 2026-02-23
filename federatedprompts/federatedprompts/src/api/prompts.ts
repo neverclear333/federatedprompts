@@ -4,6 +4,7 @@
  * 100% validated against federated configuration
  */
 
+import type { Env } from '../env';
 import { validatePromptConfig, formatValidationResponse } from '../utils/validation';
 import { generatePrompt, PromptGenerationInput, GeneratedPromptOutput } from '../utils/promptGenerators';
 
@@ -35,6 +36,7 @@ const promptStorage: Map<string, StoredPrompt> = new Map();
 
 export async function handlePromptRequest(
 	request: Request,
+	env: Env,
 	url: URL
 ): Promise<Response> {
 	const pathname = url.pathname;

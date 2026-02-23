@@ -3,9 +3,9 @@
  * Handles CRUD operations for real estate clients/leads
  */
 
+import type { Env } from '../env';
 import type { Client, ClientSegment } from '../types/realEstate';
 import { initializeCampaign, resetCampaign } from '../utils/campaignLogic';
-import { v4 as uuidv4 } from 'crypto';
 
 // In-memory storage (ready for D1 database upgrade)
 const clientDatabase = new Map<string, Client>();
@@ -109,11 +109,11 @@ export function listClients(filters?: {
 	const total = clients.length;
 
 	// Apply pagination
-	if (filters?.offset !== undefined) {
-		clients = clients.slice(filters.offset);
-	}
+	const offset = filters?.offset || 0;
 	if (filters?.limit !== undefined) {
-		clients = clients.slice(0, filters.limit);
+		clients = clients.slice(offset, offset + filters.limit);
+	} else if (offset > 0) {
+		clients = clients.slice(offset);
 	}
 
 	return { clients, total };
@@ -237,6 +237,7 @@ function isValidEmail(email: string): boolean {
  */
 export async function handleClientsRequest(
 	request: Request,
+	env: Env,
 	url: URL
 ): Promise<Response> {
 	try {
@@ -333,8 +334,9 @@ export async function handleClientsRequest(
 		}
 
 		// DELETE /api/clients/:id
-		if (clientIdMatch && request.method === 'DELETE') {
-			const clientId = clientIdMatch[1];
+		const deleteMatch = pathname.match(/^\/api\/clients\/([^/]+)$/);
+		if (deleteMatch && request.method === 'DELETE') {
+			const clientId = deleteMatch[1];
 			const success = deleteClient(clientId);
 
 			if (!success) {
