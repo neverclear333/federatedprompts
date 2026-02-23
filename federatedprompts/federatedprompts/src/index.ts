@@ -3,6 +3,7 @@
  * Routes requests to appropriate API handlers and serves frontend SPA
  */
 
+import type { Env } from './env';
 import { handleConfigRequest } from './api/config';
 import { handlePromptRequest } from './api/prompts';
 import { handleClientsRequest } from './api/clients';
@@ -32,30 +33,10 @@ export default {
 			);
 		}
 
-		// Try to serve static assets (CSS, JS, images, etc.)
-		const assetResponse = await env.ASSETS.fetch(request.clone());
-
-		// If asset exists, return it
-		if (assetResponse.status !== 404) {
-			return assetResponse;
-		}
-
-		// For SPA routing: if not an API request and not a static asset, serve index.html
-		// This allows React Router to handle the path
-		const indexResponse = await env.ASSETS.fetch(new Request(new URL('/index.html', request.url), {
-			method: 'GET',
-		}));
-
-		// Return index.html with appropriate status
-		return indexResponse.status === 404
-			? new Response(JSON.stringify({ error: 'Not found' }), {
-					status: 404,
-					headers: { 'Content-Type': 'application/json' },
-				})
-			: new Response(indexResponse.body, {
-					status: 200,
-					headers: new Headers(indexResponse.headers),
-				});
+		// Serve static assets and SPA fallback via ASSETS binding
+		// not_found_handling: "single-page-application" in wrangler.jsonc
+		// automatically serves index.html for unmatched paths
+		return env.ASSETS.fetch(request);
 	},
 } satisfies ExportedHandler<Env>;
 
@@ -64,27 +45,27 @@ async function handleApiRequest(request: Request, env: Env, url: URL): Promise<R
 
 	// Route to config API
 	if (pathname.startsWith('/api/config/')) {
-		return handleConfigRequest(url);
+		return handleConfigRequest(request, env, url);
 	}
 
 	// Route to prompts API
 	if (pathname.startsWith('/api/prompts')) {
-		return handlePromptRequest(request, url);
+		return handlePromptRequest(request, env, url);
 	}
 
 	// Route to clients API
 	if (pathname.startsWith('/api/clients')) {
-		return handleClientsRequest(request, url);
+		return handleClientsRequest(request, env, url);
 	}
 
 	// Route to campaigns API
 	if (pathname.startsWith('/api/campaigns')) {
-		return handleCampaignsRequest(request, url);
+		return handleCampaignsRequest(request, env, url);
 	}
 
 	// Route to tasks API
 	if (pathname.startsWith('/api/tasks')) {
-		return handleTasksRequest(request, url);
+		return handleTasksRequest(request, env, url);
 	}
 
 	// Default API 404

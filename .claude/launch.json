@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "federatedprompts",
+      "runtimeExecutable": "C:\\Program Files\\nodejs\\node.exe",
+      "runtimeArgs": ["federatedprompts/federatedprompts/node_modules/wrangler/bin/wrangler.js", "dev", "--config", "federatedprompts/federatedprompts/wrangler.jsonc"],
+      "port": 8787
+    }
+  ]
+}

@@ -15,7 +15,9 @@
 	],
 	"assets": {
 		// The path to the directory containing the `index.html` file to be served at `/`
-		"directory": "./public"
+		"directory": "./public",
+		"binding": "ASSETS",
+		"not_found_handling": "single-page-application"
 	},
 	"observability": {
 		"enabled": true

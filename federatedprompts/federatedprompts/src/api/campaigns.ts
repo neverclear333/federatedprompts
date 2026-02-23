@@ -3,6 +3,7 @@
  * Handles campaign sequences, email previews, and campaign operations
  */
 
+import type { Env } from '../env';
 import type { ClientSegment } from '../types/realEstate';
 import {
 	getCampaignSequence,
@@ -186,6 +187,7 @@ export function getClientNextEmail(clientId: string): {
  */
 export async function handleCampaignsRequest(
 	request: Request,
+	env: Env,
 	url: URL
 ): Promise<Response> {
 	try {
