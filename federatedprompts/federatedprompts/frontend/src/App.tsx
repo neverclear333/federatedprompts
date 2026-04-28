@@ -102,6 +102,19 @@ function App() {
               </div>
 
               <div className="card">
+                <h2>Real Estate CRM</h2>
+                <p>
+                  Manage clients, campaigns, and tasks for your real estate pipeline.
+                </p>
+                <button
+                  onClick={() => navigateTo('real-estate-dashboard')}
+                  className="btn btn-primary"
+                >
+                  Open Real Estate CRM →
+                </button>
+              </div>
+
+              <div className="card">
                 <h2>Backend Connection</h2>
                 <button onClick={checkHealth} disabled={loading} className="btn btn-secondary">
                   {loading ? 'Checking...' : 'Check Backend Health'}
