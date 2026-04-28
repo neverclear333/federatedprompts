@@ -32,30 +32,8 @@ export default {
 			);
 		}
 
-		// Try to serve static assets (CSS, JS, images, etc.)
-		const assetResponse = await env.ASSETS.fetch(request.clone());
-
-		// If asset exists, return it
-		if (assetResponse.status !== 404) {
-			return assetResponse;
-		}
-
-		// For SPA routing: if not an API request and not a static asset, serve index.html
-		// This allows React Router to handle the path
-		const indexResponse = await env.ASSETS.fetch(new Request(new URL('/index.html', request.url), {
-			method: 'GET',
-		}));
-
-		// Return index.html with appropriate status
-		return indexResponse.status === 404
-			? new Response(JSON.stringify({ error: 'Not found' }), {
-					status: 404,
-					headers: { 'Content-Type': 'application/json' },
-				})
-			: new Response(indexResponse.body, {
-					status: 200,
-					headers: new Headers(indexResponse.headers),
-				});
+		// Static assets and SPA fallback handled by the platform via not_found_handling
+		return env.ASSETS.fetch(request);
 	},
 } satisfies ExportedHandler<Env>;
 
