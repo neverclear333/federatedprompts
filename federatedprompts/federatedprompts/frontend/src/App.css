@@ -1,13 +1,13 @@
 #root {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100%;
 }
 
 .app {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100%;
 }
 
 /* ===== Navigation ===== */
@@ -67,18 +67,22 @@
 
 /* ===== Main Content ===== */
 .app-main {
-  flex: 1;
+  flex: 1 1 0;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  /* Other pages (PromptEngineer, RealEstateDashboard) scroll inside here.
+     The home page sets overflow: hidden on itself so it stays single-screen. */
+  overflow: auto;
 }
 
 .home-page {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  /* Fill the viewport beneath the sticky nav. Approximate nav height ~64px. */
-  height: calc(100vh - 64px);
+  flex: 1 1 0;
   width: 100%;
+  min-height: 0;
+  overflow: hidden;
   padding: 0;
 }
 
@@ -88,16 +92,18 @@
   text-align: center;
 }
 
-/* ===== Sliders area (top 85%) ===== */
+/* ===== Sliders area (4 rows × 18% of viewport-area = 72%) ===== */
 .sliders-area {
-  flex: 0 0 85%;
+  flex: 0 0 72%;
   display: flex;
   flex-direction: column;
   padding: 1rem 2rem;
   gap: 0.5rem;
+  min-height: 0;
 }
 
 .slider-row {
+  /* Each row consumes 1/4 of .sliders-area, i.e. 18% of the home-page area */
   flex: 1 1 0;
   display: flex;
   flex-direction: column;
@@ -210,14 +216,15 @@
   margin: 0;
 }
 
-/* ===== Bottom cards row (15%) ===== */
+/* ===== Bottom cards row (fills the remaining ~28%) ===== */
 .cards-row {
-  flex: 0 0 15%;
+  flex: 1 1 0;
   display: flex;
   gap: 1rem;
   padding: 0.5rem 2rem 1rem;
   align-items: stretch;
   border-top: 1px solid rgba(100, 108, 255, 0.2);
+  min-height: 0;
 }
 
 .card-compact {
