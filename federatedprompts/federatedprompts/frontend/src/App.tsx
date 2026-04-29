@@ -5,11 +5,93 @@ import './App.css'
 
 type Page = 'home' | 'prompt-engineer' | 'real-estate-dashboard'
 
+type SliderKey = 'temperature' | 'pressure' | 'timelines' | 'algorithm'
+
+interface SliderSpec {
+  key: SliderKey
+  label: string
+  // 5 segment background colors, left -> right
+  segments: [string, string, string, string, string]
+  // 6 tick labels, left -> right
+  ticks: [string, string, string, string, string, string]
+}
+
+const SLIDER_SPECS: SliderSpec[] = [
+  {
+    key: 'temperature',
+    label: 'Temperature',
+    segments: ['#DBEAFE', '#93C5FD', '#9CA3AF', '#2563EB', '#1E3A8A'],
+    ticks: ['0.0', '0.2', '0.4', '0.6', '0.8', '1.0'],
+  },
+  {
+    key: 'pressure',
+    label: 'Pressure',
+    segments: ['#DCFCE7', '#86EFAC', '#9CA3AF', '#16A34A', '#14532D'],
+    ticks: ['Very Low', 'Low', 'Med', 'Med High', 'High', 'Very High'],
+  },
+  {
+    key: 'timelines',
+    label: 'Timelines',
+    segments: ['#FEE2E2', '#FCA5A5', '#9CA3AF', '#DC2626', '#7F1D1D'],
+    ticks: ['Now', 'Today', 'This Week', 'This Month', 'This Quarter', 'This Year'],
+  },
+  {
+    key: 'algorithm',
+    label: 'Algorithm',
+    segments: ['#EDE9FE', '#C4B5FD', '#9CA3AF', '#7C3AED', '#4C1D95'],
+    ticks: ['Greedy', 'Heuristic', 'Balanced', 'Optimized', 'Exhaustive', 'Brute-force'],
+  },
+]
+
+const SLIDER_STORAGE_KEY = 'federatedprompts.homeSliders'
+
+function loadSliderState(): Record<SliderKey, number> {
+  const defaults: Record<SliderKey, number> = {
+    temperature: 0,
+    pressure: 0,
+    timelines: 0,
+    algorithm: 0,
+  }
+  try {
+    const raw = localStorage.getItem(SLIDER_STORAGE_KEY)
+    if (!raw) return defaults
+    const parsed = JSON.parse(raw)
+    return {
+      temperature: clampTick(parsed.temperature ?? 0),
+      pressure: clampTick(parsed.pressure ?? 0),
+      timelines: clampTick(parsed.timelines ?? 0),
+      algorithm: clampTick(parsed.algorithm ?? 0),
+    }
+  } catch {
+    return defaults
+  }
+}
+
+function clampTick(n: unknown): number {
+  const num = typeof n === 'number' ? n : Number(n)
+  if (!Number.isFinite(num)) return 0
+  return Math.max(0, Math.min(5, Math.round(num)))
+}
+
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('prompt-engineer')
   const [count, setCount] = useState(0)
   const [status, setStatus] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [sliderValues, setSliderValues] = useState<Record<SliderKey, number>>(loadSliderState)
+
+  // Persist slider state on change
+  useEffect(() => {
+    try {
+      localStorage.setItem(SLIDER_STORAGE_KEY, JSON.stringify(sliderValues))
+    } catch {
+      // ignore storage errors (private mode, quota)
+    }
+  }, [sliderValues])
+
+  const setSlider = (key: SliderKey, value: number) => {
+    setSliderValues((prev) => ({ ...prev, [key]: clampTick(value) }))
+  }
 
   // Initialize page from URL on mount
   useEffect(() => {
@@ -85,68 +167,111 @@ function App() {
       <main className="app-main">
         {currentPage === 'home' && (
           <div className="home-page">
-            <div className="container">
-              <h1>🚀 FederatedPrompts</h1>
+            <section className="sliders-area">
+              {SLIDER_SPECS.map((spec) => (
+                <div className="slider-row" key={spec.key}>
+                  <div className="slider-label">{spec.label}</div>
+                  <div className="slider-control-wrap">
+                    <div className="slider-track">
+                      <div className="slider-segments" aria-hidden="true">
+                        {spec.segments.map((color, i) => (
+                          <div
+                            key={i}
+                            className="slider-segment"
+                            style={{ backgroundColor: color }}
+                          />
+                        ))}
+                      </div>
+                      <div className="slider-ticks">
+                        {spec.ticks.map((tick, i) => (
+                          <button
+                            key={tick + i}
+                            type="button"
+                            className={
+                              'slider-tick' +
+                              (sliderValues[spec.key] === i ? ' is-active' : '')
+                            }
+                            style={{ left: `${(i / 5) * 100}%` }}
+                            aria-label={`${spec.label}: ${tick}`}
+                            aria-pressed={sliderValues[spec.key] === i}
+                            onClick={() => setSlider(spec.key, i)}
+                          >
+                            <span className="slider-tick-dot" />
+                            <span className="slider-tick-label">{tick}</span>
+                          </button>
+                        ))}
+                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={5}
+                        step={1}
+                        value={sliderValues[spec.key]}
+                        onChange={(e) => setSlider(spec.key, Number(e.target.value))}
+                        className="slider-range"
+                        aria-label={spec.label}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </section>
 
-              <div className="card">
-                <h2>Welcome to FederatedPrompts</h2>
-                <p>
-                  A powerful tool for generating structured prompts for UML-driven development.
-                </p>
+            <section className="cards-row">
+              <div className="card card-compact">
+                <h2>Welcome</h2>
+                <p>Structured prompts for UML-driven development.</p>
                 <button
                   onClick={() => navigateTo('prompt-engineer')}
                   className="btn btn-primary"
                 >
-                  Start Creating Prompts →
+                  Start Prompts →
                 </button>
               </div>
 
-              <div className="card">
+              <div className="card card-compact">
                 <h2>Real Estate CRM</h2>
-                <p>
-                  Manage clients, campaigns, and tasks for your real estate pipeline.
-                </p>
+                <p>Clients, campaigns, and tasks pipeline.</p>
                 <button
                   onClick={() => navigateTo('real-estate-dashboard')}
                   className="btn btn-primary"
                 >
-                  Open Real Estate CRM →
+                  Open CRM →
                 </button>
               </div>
 
-              <div className="card">
-                <h2>Backend Connection</h2>
+              <div className="card card-compact">
+                <h2>Backend</h2>
                 <button onClick={checkHealth} disabled={loading} className="btn btn-secondary">
-                  {loading ? 'Checking...' : 'Check Backend Health'}
+                  {loading ? 'Checking…' : 'Check Health'}
                 </button>
                 {status && (
                   <p className={status.includes('✗') ? 'error' : 'success'}>{status}</p>
                 )}
               </div>
 
-              <div className="card">
-                <h2>Frontend Test</h2>
+              <div className="card card-compact">
+                <h2>Frontend</h2>
                 <button
-                  onClick={() => setCount((count) => count + 1)}
+                  onClick={() => setCount((c) => c + 1)}
                   className="btn btn-secondary"
                 >
                   Count: {count}
                 </button>
-                <p>React frontend is working!</p>
+                <p>React is working.</p>
               </div>
 
-              <div className="info">
-                <h3>Features</h3>
+              <div className="card card-compact card-features">
+                <h2>Features</h2>
                 <ul>
-                  <li>✓ Generate Gherkin BDD prompts with multiple scenarios</li>
-                  <li>✓ Create Jira user stories with acceptance criteria</li>
-                  <li>✓ Select from 8 different UML artifact types</li>
-                  <li>✓ Federated configuration with 100% API validation</li>
-                  <li>✓ LocalStorage + Backend sync for persistence</li>
-                  <li>✓ Export prompts in multiple formats</li>
+                  <li>Gherkin BDD prompts</li>
+                  <li>Jira user stories</li>
+                  <li>8 UML artifact types</li>
+                  <li>Federated config + API validation</li>
+                  <li>LocalStorage + backend sync</li>
                 </ul>
               </div>
-            </div>
+            </section>
           </div>
         )}
 
