@@ -112,10 +112,12 @@
 }
 
 .slider-label {
-  /* Full-width banner; matches the height of the .btn used inside .card-compact
-     (font-size 0.75rem + padding 0.3em 0.6em + 1px border). */
+  /* 85%-wide banner sitting flush on top of the slider track (also 85% wide).
+     Height matches the .btn used inside .card-compact (font-size 0.75rem +
+     padding 0.3em 0.6em + 1px border). */
   display: block;
-  width: 100%;
+  width: 85%;
+  margin: 0 auto;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -124,16 +126,20 @@
   text-align: center;
   padding: 0.3em 0.6em;
   border: 1px solid rgba(100, 108, 255, 0.3);
-  border-radius: 8px;
+  /* Round only the top corners — the bottom edge sits on the segments bar. */
+  border-radius: 8px 8px 0 0;
+  border-bottom: none;
   background: rgba(100, 108, 255, 0.15);
   line-height: 1.5;
-  margin-bottom: 0.4rem;
 }
 
 .slider-control-wrap {
-  flex: 1 1 0;
+  /* Natural height so the slider sits flush under the label; the parent
+     .slider-row uses justify-content: center to vertically center the
+     [label + slider] stack. */
+  flex: 0 0 auto;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   min-height: 0;
 }
@@ -148,7 +154,8 @@
   position: absolute;
   inset: 0;
   display: flex;
-  border-radius: 8px;
+  /* Flat top so the segments visually merge with the label banner above. */
+  border-radius: 0 0 8px 8px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
